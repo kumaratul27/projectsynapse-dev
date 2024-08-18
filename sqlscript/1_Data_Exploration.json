@@ -1,0 +1,17 @@
+{
+	"name": "1_Data_Exploration",
+	"properties": {
+		"content": {
+			"query": "-- HTTPS\n\nSELECT *\nFROM \n    OPENROWSET(\n        BULK 'https://projectsynapsedev.dfs.core.windows.net/raw/Unemployment.csv',\n        FORMAT = 'CSV',\n        PARSER_VERSION = '2.0'\n\n    ) AS [data]\n\n\n-- ABFSS\n\nSELECT *\nFROM \n    OPENROWSET(\n        BULK 'abfss://raw@projectsynapsedev.dfs.core.windows.net/Unemployment.csv',\n        FORMAT = 'CSV',\n        PARSER_VERSION = '2.0'\n\n    ) AS [data]\n\n\n--HEADER ROW\n\nSELECT *\nFROM \n    OPENROWSET(\n        BULK 'abfss://raw@projectsynapsedev.dfs.core.windows.net/Unemployment.csv',\n        FORMAT = 'CSV',\n        HEADER_ROW = TRUE,\n        PARSER_VERSION = '2.0'\n    ) AS [data]\n\n\n-- SPECIFIC COLUMNS\n\n\nSELECT [Line Number],[Month]\nFROM \n    OPENROWSET(\n        BULK 'abfss://raw@projectsynapsedev.dfs.core.windows.net/Unemployment.csv',\n        FORMAT = 'CSV',\n        HEADER_ROW = TRUE,\n        PARSER_VERSION = '2.0'\n    ) AS [data]\n\n-- ALAS\n\nSELECT [data].[Line Number],[data].[Month]\nFROM \n    OPENROWSET(\n        BULK 'abfss://raw@projectsynapsedev.dfs.core.windows.net/Unemployment.csv',\n        FORMAT = 'CSV',\n        HEADER_ROW = TRUE,\n        PARSER_VERSION = '2.0'\n    ) AS [data]\n\n-- WITH CLAUSE\n\nSELECT [data].[Line Number],[data].[Month]\nFROM \n    OPENROWSET(\n        BULK 'abfss://raw@projectsynapsedev.dfs.core.windows.net/Unemployment.csv',\n        FORMAT = 'CSV',\n        HEADER_ROW = TRUE,\n        PARSER_VERSION = '2.0'\n    ) \n    WITH (\n        [Line Number] INT,\n        [Month] VARCHAR(10)\n    ) AS [data]\n\n\n-- first row\n\nSELECT [data].[Line Number],[data].[Month]\nFROM \n    OPENROWSET(\n        BULK 'abfss://raw@projectsynapsedev.dfs.core.windows.net/Unemployment.csv',\n        FORMAT = 'CSV',\n        FIRSTROW = 2,\n        PARSER_VERSION = '2.0'\n    ) \n    WITH (\n        [Line Number] INT,\n        [Month] VARCHAR(10)\n    ) AS [data]\n\n\n-- field terminator\n\nSELECT *\nFROM \n    OPENROWSET(\n        BULK 'abfss://raw@projectsynapsedev.dfs.core.windows.net/Unemployment.psv',\n        FORMAT = 'CSV',\n        HEADER_ROW = TRUE,\n        FIELDTERMINATOR = '|',\n        PARSER_VERSION = '2.0'\n    ) \n    AS [data]\n",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "master",
+				"poolName": "Built-in"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}

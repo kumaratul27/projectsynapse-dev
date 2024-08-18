@@ -1,0 +1,17 @@
+{
+	"name": "3_Creating_External_Datasource",
+	"properties": {
+		"content": {
+			"query": "SELECT [data].[Line Number],[data].[Month]\nFROM \n    OPENROWSET(\n        BULK 'Unemployment.csv',\n        FORMAT = 'CSV',\n        FIRSTROW = 2,\n        PARSER_VERSION = '2.0'\n    ) \n    WITH (\n        [Line Number] VARCHAR(10),\n        [Month] VARCHAR(10)\n    ) AS [data]\n\n-- Creating an external datasource\n\nCREATE EXTERNAL DATA SOURCE raw_container\nWITH (\n    LOCATION = 'abfss://raw@projectsynapsedev.dfs.core.windows.net/'\n)\n\n\n-- Another datasource pointing to newraw\n\nCREATE EXTERNAL DATA SOURCE newraw_container\nWITH (\n    LOCATION = 'abfss://newraw@projectsynapsedev.dfs.core.windows.net/'\n)\n\n-- Using external datasource\n\nSELECT [data].[Line Number],[data].[Month]\nFROM \n    OPENROWSET(\n        BULK 'Unemployment.csv',\n        DATA_SOURCE = 'newraw_container',\n        FORMAT = 'CSV',\n        FIRSTROW = 2,\n        PARSER_VERSION = '2.0'\n    ) \n    WITH (\n        [Line Number] VARCHAR(10),\n        [Month] VARCHAR(10)\n    ) AS [data]",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "ProjectDB",
+				"poolName": "Built-in"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}

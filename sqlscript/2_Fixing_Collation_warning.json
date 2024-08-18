@@ -1,0 +1,17 @@
+{
+	"name": "2_Fixing_Collation_warning",
+	"properties": {
+		"content": {
+			"query": "SELECT [data].[Line Number],[data].[Month]\nFROM \n    OPENROWSET(\n        BULK 'abfss://raw@projectsynapsedev.dfs.core.windows.net/Unemployment.csv',\n        FORMAT = 'CSV',\n        FIRSTROW = 2,\n        PARSER_VERSION = '2.0'\n    ) \n    WITH (\n        [Line Number] VARCHAR(10),\n        [Month] VARCHAR(10)\n    ) AS [data]\n\n    -- CREATE DATABASE\n\n    CREATE DATABASE ProjectDB\n\n\n-- EXPLICITLY USING COLLATION ON COLUMNS\n\n\nSELECT [data].[Line Number],[data].[Month]\nFROM \n    OPENROWSET(\n        BULK 'abfss://raw@projectsynapsedev.dfs.core.windows.net/Unemployment.csv',\n        FORMAT = 'CSV',\n        FIRSTROW = 2,\n        PARSER_VERSION = '2.0'\n    ) \n    WITH (\n        [Line Number] VARCHAR(10) COLLATE Latin1_General_100_CI_AS_KS_SC_UTF8,\n        [Month] VARCHAR(10) COLLATE Latin1_General_100_CI_AS_KS_SC_UTF8\n    ) AS [data]\n\n\n--CHANGE COLLATION FOR ENTIRE DATABASE\n\nALTER DATABASE ProjectDB\nCOLLATE Latin1_General_100_CI_AS_KS_SC_UTF8\n\n\n-- Rexecute \n\nSELECT [data].[Line Number],[data].[Month]\nFROM \n    OPENROWSET(\n        BULK 'abfss://raw@projectsynapsedev.dfs.core.windows.net/Unemployment.csv',\n        FORMAT = 'CSV',\n        FIRSTROW = 2,\n        PARSER_VERSION = '2.0'\n    ) \n    WITH (\n        [Line Number] VARCHAR(10),\n        [Month] VARCHAR(10)\n    ) AS [data]\n\n",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "ProjectDB",
+				"poolName": "Built-in"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}
