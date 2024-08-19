@@ -6,6 +6,10 @@
 		},
 		"nbformat": 4,
 		"nbformat_minor": 2,
+		"bigDataPool": {
+			"referenceName": "smallpool",
+			"type": "BigDataPoolReference"
+		},
 		"sessionProperties": {
 			"driverMemory": "28g",
 			"driverCores": 4,
@@ -17,17 +21,33 @@
 				"spark.dynamicAllocation.enabled": "false",
 				"spark.dynamicAllocation.minExecutors": "2",
 				"spark.dynamicAllocation.maxExecutors": "2",
-				"spark.autotune.trackingId": "48f66693-4d06-4a38-a82a-0eab0c5d08bc"
+				"spark.autotune.trackingId": "02034c39-58da-49b1-8779-66c56a318ffd"
 			}
 		},
 		"metadata": {
 			"saveOutput": true,
-			"synapse_widget": {
-				"version": "0.1"
-			},
 			"enableDebugMode": false,
+			"kernelspec": {
+				"name": "synapse_pyspark",
+				"display_name": "Synapse PySpark"
+			},
 			"language_info": {
 				"name": "python"
+			},
+			"a365ComputeOptions": {
+				"id": "/subscriptions/326fa8fa-1dc7-4752-95af-24f0d1e0b586/resourceGroups/projectsynapse/providers/Microsoft.Synapse/workspaces/projectsynapse-dev/bigDataPools/smallpool",
+				"name": "smallpool",
+				"type": "Spark",
+				"endpoint": "https://projectsynapse-dev.dev.azuresynapse.net/livyApi/versions/2019-11-01-preview/sparkPools/smallpool",
+				"auth": {
+					"type": "AAD",
+					"authResource": "https://dev.azuresynapse.net"
+				},
+				"sparkVersion": "3.4",
+				"nodeCount": 3,
+				"cores": 4,
+				"memory": 28,
+				"automaticScaleJobs": false
 			},
 			"sessionKeepAliveTimeout": 30
 		},
@@ -46,13 +66,13 @@
 					}
 				},
 				"source": [
-					"# Mounting a container \r\n",
-					"\r\n",
-					"mssparkutils.fs.mount(\r\n",
-					"    'abfss://refined@projectsynapsestorage.dfs.core.windows.net/',\r\n",
-					"    '/lake',\r\n",
-					"    {\"LinkedService\":\"projectsynapse-WorkspaceDefaultStorage\"}\r\n",
-					"\r\n",
+					"# Mounting a container \n",
+					"\n",
+					"mssparkutils.fs.mount(\n",
+					"    'abfss://refined@projectsynapsedev.dfs.core.windows.net/',\n",
+					"    '/lake',\n",
+					"    {\"LinkedService\":\"projectsynapse-WorkspaceDefaultStorage\"}\n",
+					"\n",
 					")"
 				],
 				"execution_count": 1

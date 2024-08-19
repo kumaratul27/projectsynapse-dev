@@ -6,6 +6,10 @@
 		},
 		"nbformat": 4,
 		"nbformat_minor": 2,
+		"bigDataPool": {
+			"referenceName": "smallpool",
+			"type": "BigDataPoolReference"
+		},
 		"sessionProperties": {
 			"driverMemory": "28g",
 			"driverCores": 4,
@@ -16,7 +20,7 @@
 				"spark.dynamicAllocation.enabled": "false",
 				"spark.dynamicAllocation.minExecutors": "2",
 				"spark.dynamicAllocation.maxExecutors": "2",
-				"spark.autotune.trackingId": "755d19fb-7a5e-41d0-bdfa-3fc7bed3eada"
+				"spark.autotune.trackingId": "0e32bdac-0663-40fb-af3c-e4573e1eba2c"
 			}
 		},
 		"metadata": {
@@ -28,6 +32,21 @@
 			},
 			"language_info": {
 				"name": "python"
+			},
+			"a365ComputeOptions": {
+				"id": "/subscriptions/326fa8fa-1dc7-4752-95af-24f0d1e0b586/resourceGroups/projectsynapse/providers/Microsoft.Synapse/workspaces/projectsynapse-dev/bigDataPools/smallpool",
+				"name": "smallpool",
+				"type": "Spark",
+				"endpoint": "https://projectsynapse-dev.dev.azuresynapse.net/livyApi/versions/2019-11-01-preview/sparkPools/smallpool",
+				"auth": {
+					"type": "AAD",
+					"authResource": "https://dev.azuresynapse.net"
+				},
+				"sparkVersion": "3.4",
+				"nodeCount": 3,
+				"cores": 4,
+				"memory": 28,
+				"automaticScaleJobs": false
 			},
 			"sessionKeepAliveTimeout": 30
 		},
@@ -48,7 +67,7 @@
 				"source": [
 					"mssparkutils.notebook.run('4 - MSSpark Utilities/6 - Mount configuration')"
 				],
-				"execution_count": 2
+				"execution_count": null
 			},
 			{
 				"cell_type": "code",
@@ -64,14 +83,14 @@
 					}
 				},
 				"source": [
-					"## - Accessing the Files from Mountpoint \r\n",
-					"## Syntax:\r\n",
-					"# synfs:/<jobid>/<mountpoint>/<path>\r\n",
-					"# To get JobID - mssparkutils.env.getJobId()\r\n",
-					"\r\n",
-					"\r\n",
-					"job_id = mssparkutils.env.getJobId()\r\n",
-					"\r\n",
+					"## - Accessing the Files from Mountpoint \n",
+					"## Syntax:\n",
+					"# synfs:/<jobid>/<mountpoint>/<path>\n",
+					"# To get JobID - mssparkutils.env.getJobId()\n",
+					"\n",
+					"\n",
+					"job_id = mssparkutils.env.getJobId()\n",
+					"\n",
 					"mount_point = 'synfs:/' + job_id + '/lake'"
 				],
 				"execution_count": 3
@@ -90,10 +109,10 @@
 					}
 				},
 				"source": [
-					"# Reading left dataframe - Education Details.csv \r\n",
-					"\r\n",
-					"df_ed = spark.read.format('csv')\\\r\n",
-					"                .option('header','true')\\\r\n",
+					"# Reading left dataframe - Education Details.csv \n",
+					"\n",
+					"df_ed = spark.read.format('csv')\\\n",
+					"                .option('header','true')\\\n",
 					"                .load(mount_point+'/For Joins/For Understanding Joins/Education Details.csv')"
 				],
 				"execution_count": 4
@@ -112,10 +131,10 @@
 					}
 				},
 				"source": [
-					"# Reading left dataframe - Salary Details.csv \r\n",
-					"\r\n",
-					"df_sal = spark.read.format('csv')\\\r\n",
-					"                .option('header','true')\\\r\n",
+					"# Reading left dataframe - Salary Details.csv \n",
+					"\n",
+					"df_sal = spark.read.format('csv')\\\n",
+					"                .option('header','true')\\\n",
 					"                .load(mount_point+'/For Joins/For Understanding Joins/Salary Details.csv')"
 				],
 				"execution_count": 5
@@ -134,11 +153,11 @@
 					}
 				},
 				"source": [
-					"#  Viewing the content of both dataframes\r\n",
-					"\r\n",
-					"print('Seeing content of Education Details: ')\r\n",
-					"df_ed.show()\r\n",
-					"print('Seeing content of Salary Details: ')\r\n",
+					"#  Viewing the content of both dataframes\n",
+					"\n",
+					"print('Seeing content of Education Details: ')\n",
+					"df_ed.show()\n",
+					"print('Seeing content of Salary Details: ')\n",
 					"df_sal.show()"
 				],
 				"execution_count": 6
@@ -170,8 +189,8 @@
 					}
 				},
 				"source": [
-					"#1 - Inner join \r\n",
-					"\r\n",
+					"#1 - Inner join \n",
+					"\n",
 					"df_ed.join(df_sal,on='Education Level',how='inner').show()"
 				],
 				"execution_count": 7
@@ -203,8 +222,8 @@
 					}
 				},
 				"source": [
-					"# 2 - Left join \r\n",
-					"\r\n",
+					"# 2 - Left join \n",
+					"\n",
 					"df_ed.join(df_sal,on='Education Level',how='left' ).show()"
 				],
 				"execution_count": 9
@@ -236,8 +255,8 @@
 					}
 				},
 				"source": [
-					"# 3 - Right join \r\n",
-					"\r\n",
+					"# 3 - Right join \n",
+					"\n",
 					"df_ed.join(df_sal,on='Education Level',how='right' ).show()"
 				],
 				"execution_count": 10
@@ -269,7 +288,7 @@
 					}
 				},
 				"source": [
-					"#4 - Outer join\r\n",
+					"#4 - Outer join\n",
 					"df_ed.join(df_sal,on='Education Level',how='outer' ).show()"
 				],
 				"execution_count": 11
@@ -301,8 +320,8 @@
 					}
 				},
 				"source": [
-					"# 5- Left Semi\r\n",
-					"\r\n",
+					"# 5- Left Semi\n",
+					"\n",
 					"df_ed.join(df_sal,on='Education Level',how='leftsemi' ).show()"
 				],
 				"execution_count": 12
@@ -334,7 +353,7 @@
 					}
 				},
 				"source": [
-					"#6- Left Anti \r\n",
+					"#6- Left Anti \n",
 					"df_ed.join(df_sal,on='Education Level',how='leftanti' ).show()"
 				],
 				"execution_count": 13
@@ -366,7 +385,7 @@
 					}
 				},
 				"source": [
-					"#7- Cross Join\r\n",
+					"#7- Cross Join\n",
 					"df_ed.join(df_sal,on='Education Level',how='cross' ).show()"
 				],
 				"execution_count": 14
@@ -411,19 +430,19 @@
 					}
 				},
 				"source": [
-					"# Lets create a sample dataframe for exploring Union()\r\n",
-					"data1 = [(\"John\", 25), (\"Alice\", 30), (\"Bob\", 35)]\r\n",
-					"columns = [\"Name\", \"Age\"]\r\n",
-					"df1 = spark.createDataFrame(data1, columns)\r\n",
-					"\r\n",
-					"# Creating another dataframe \r\n",
-					"data2 = [(\"Alice\", 30), (\"Eve\", 28), (\"Bob\", 35)]\r\n",
-					"df2 = spark.createDataFrame(data2, columns)\r\n",
-					"\r\n",
-					"print('df1 columns:')\r\n",
-					"df1.show()\r\n",
-					"\r\n",
-					"print('df2 columns:')\r\n",
+					"# Lets create a sample dataframe for exploring Union()\n",
+					"data1 = [(\"John\", 25), (\"Alice\", 30), (\"Bob\", 35)]\n",
+					"columns = [\"Name\", \"Age\"]\n",
+					"df1 = spark.createDataFrame(data1, columns)\n",
+					"\n",
+					"# Creating another dataframe \n",
+					"data2 = [(\"Alice\", 30), (\"Eve\", 28), (\"Bob\", 35)]\n",
+					"df2 = spark.createDataFrame(data2, columns)\n",
+					"\n",
+					"print('df1 columns:')\n",
+					"df1.show()\n",
+					"\n",
+					"print('df2 columns:')\n",
 					"df2.show()"
 				],
 				"execution_count": 15
@@ -442,8 +461,8 @@
 					}
 				},
 				"source": [
-					"#1 - Union\r\n",
-					"\r\n",
+					"#1 - Union\n",
+					"\n",
 					"df1.union(df2).show()"
 				],
 				"execution_count": 16
