@@ -1,0 +1,199 @@
+{
+	"name": "9_Bucketing",
+	"properties": {
+		"folder": {
+			"name": "final"
+		},
+		"nbformat": 4,
+		"nbformat_minor": 2,
+		"sessionProperties": {
+			"driverMemory": "28g",
+			"driverCores": 4,
+			"executorMemory": "28g",
+			"executorCores": 4,
+			"numExecutors": 2,
+			"conf": {
+				"spark.dynamicAllocation.enabled": "false",
+				"spark.dynamicAllocation.minExecutors": "2",
+				"spark.dynamicAllocation.maxExecutors": "2",
+				"spark.autotune.trackingId": "61d3e909-fac3-4d83-89cd-5afad57010cb"
+			}
+		},
+		"metadata": {
+			"saveOutput": true,
+			"enableDebugMode": false,
+			"kernelspec": {
+				"name": "synapse_pyspark",
+				"display_name": "python"
+			},
+			"language_info": {
+				"name": "python"
+			},
+			"sessionKeepAliveTimeout": 30
+		},
+		"cells": [
+			{
+				"cell_type": "markdown",
+				"source": [
+					"## 9 - Bucketing\n",
+					"\n",
+					"\n",
+					""
+				]
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"## Reading roads dataset\n",
+					"\n",
+					"df_roads = (spark.read.format('csv')\n",
+					"                .option('header','true')\n",
+					"                .load('abfss://optimization@projectsynapsestorage.dfs.core.windows.net/7. Bucketing/n_raw_roads.csv'))"
+				],
+				"execution_count": 7
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"## Reading Traffic Dataset\n",
+					"\n",
+					"df_traffic = (spark.read.format('csv')\n",
+					"                .option('header','true')\n",
+					"                .load('abfss://optimization@projectsynapsestorage.dfs.core.windows.net/7. Bucketing/n_raw_traffic.csv'))"
+				],
+				"execution_count": 9
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"## Traffic_no bucket table\n",
+					"\n",
+					"df_traffic.write.mode('overwrite').saveAsTable('traffic_nobucket')"
+				],
+				"execution_count": 10
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"## roads_no bucket table\n",
+					"\n",
+					"df_roads.write.mode('overwrite').saveAsTable('roads_nobucket')"
+				],
+				"execution_count": 11
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"## Reading traffic_nobucket table\n",
+					"\n",
+					"df_trafficTable = spark.table('traffic_nobucket')"
+				],
+				"execution_count": 12
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"## Reading roads_nobucket table\n",
+					"\n",
+					"df_roadsTable = spark.table('roads_nobucket')"
+				],
+				"execution_count": 13
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"spark.conf.set(\"spark.sql.adaptive.enabled\",\"false\")"
+				],
+				"execution_count": 14
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"spark.conf.set(\"spark.sql.autoBroadcastJoinThreshold\",-1)"
+				],
+				"execution_count": 15
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"## Joining tables no bucketing\n",
+					"\n",
+					"df_joined = df_trafficTable.join(df_roadsTable, df_trafficTable['Road_Category_ID'] == df_roadsTable['Road_category_id'], 'left')"
+				],
+				"execution_count": 16
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"display(df_joined)"
+				],
+				"execution_count": 17
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"## Traffic with bucketing\n",
+					"\n",
+					"\n",
+					"\n",
+					"df_traffic.write.bucketBy(4,'Road_Category_ID').mode('overwrite').saveAsTable('traffic_withbucket')"
+				],
+				"execution_count": 29
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"## roads_with bucket table\n",
+					"\n",
+					"df_roads.write.bucketBy(4,'Road_category_id').mode('overwrite').saveAsTable('roads_withbucket')"
+				],
+				"execution_count": 30
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"## Reading traffic_withbucket table\n",
+					"\n",
+					"df_trafficBucketTable = spark.table('traffic_withbucket')"
+				],
+				"execution_count": 31
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"## Reading traffic_withbucket table\n",
+					"\n",
+					"df_roadsBucketTable = spark.table('roads_withbucket')"
+				],
+				"execution_count": 32
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"## Joining tables with bucketing\n",
+					"\n",
+					"df_bucketjoined = df_trafficBucketTable.join(df_roadsBucketTable, df_trafficBucketTable['Road_Category_ID'] == df_roadsBucketTable['Road_category_id'], 'left')"
+				],
+				"execution_count": 33
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"## Bucketed display\n",
+					"\n",
+					"display(df_bucketjoined)"
+				],
+				"execution_count": 34
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"\n",
+					"\n",
+					""
+				],
+				"execution_count": null
+			}
+		]
+	}
+}

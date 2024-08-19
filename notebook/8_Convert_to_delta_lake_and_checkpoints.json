@@ -1,0 +1,621 @@
+{
+	"name": "8_Convert_to_delta_lake_and_checkpoints",
+	"properties": {
+		"folder": {
+			"name": "final"
+		},
+		"nbformat": 4,
+		"nbformat_minor": 2,
+		"sessionProperties": {
+			"driverMemory": "28g",
+			"driverCores": 4,
+			"executorMemory": "28g",
+			"executorCores": 4,
+			"numExecutors": 2,
+			"conf": {
+				"spark.dynamicAllocation.enabled": "false",
+				"spark.dynamicAllocation.minExecutors": "2",
+				"spark.dynamicAllocation.maxExecutors": "2",
+				"spark.autotune.trackingId": "861de8a2-201c-4de3-a3bb-4f53f868120d"
+			}
+		},
+		"metadata": {
+			"saveOutput": true,
+			"enableDebugMode": false,
+			"kernelspec": {
+				"name": "synapse_pyspark",
+				"display_name": "Synapse PySpark"
+			},
+			"language_info": {
+				"name": "python"
+			},
+			"sessionKeepAliveTimeout": 30
+		},
+		"cells": [
+			{
+				"cell_type": "code",
+				"source": [
+					"sc"
+				],
+				"execution_count": 1
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"from pyspark.sql.types import StructType,StructField, StringType, IntegerType,DateType,FloatType,DoubleType\r\n",
+					"\r\n",
+					"schema1 = StructType([\r\n",
+					"    StructField('Education_Level',StringType()),\r\n",
+					"    StructField('Line_Number',IntegerType()),\r\n",
+					"    StructField('Year',IntegerType()),\r\n",
+					"    StructField('Month',StringType()),\r\n",
+					"    StructField('State',StringType()),\r\n",
+					"    StructField('Labor_Force',IntegerType()),\r\n",
+					"    StructField('Employed',IntegerType()),\r\n",
+					"    StructField('Unemployed',IntegerType()),\r\n",
+					"    StructField('Industry',StringType()),\r\n",
+					"    StructField('Gender',StringType()),\r\n",
+					"    StructField('Date_Inserted',StringType()),\r\n",
+					"    StructField('UnEmployed_Rate_Percentage',DoubleType()),\r\n",
+					"    StructField('Min_Salary_USD',IntegerType()),\r\n",
+					"    StructField('Max_Salary_USD',IntegerType()),\r\n",
+					"    StructField('dense_rank',IntegerType())\r\n",
+					"])"
+				],
+				"execution_count": 2
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"df = spark.read.format('csv')\\\r\n",
+					"               .option('header','true')\\\r\n",
+					"               .schema(schema1)\\\r\n",
+					"               .load('abfss://delta@projectsynapsestorage.dfs.core.windows.net/Required Files/SchemaManagementDelta.csv')"
+				],
+				"execution_count": 3
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"df.write.format('parquet').save('abfss://delta@projectsynapsestorage.dfs.core.windows.net/OnlyParquet/')"
+				],
+				"execution_count": 4
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"dfnew = df.withColumnRenamed(existing='Line_Number',new='LNo')"
+				],
+				"execution_count": 5
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"dfnew.write.format('parquet').mode('overwrite').save('abfss://delta@projectsynapsestorage.dfs.core.windows.net/OnlyParquet/')"
+				],
+				"execution_count": 7
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"microsoft": {
+						"language": "sparksql"
+					},
+					"collapsed": false
+				},
+				"source": [
+					"%%sql\r\n",
+					"\r\n",
+					"CONVERT TO DELTA parquet.`abfss://delta@projectsynapsestorage.dfs.core.windows.net/OnlyParquet/`"
+				],
+				"execution_count": 8
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"collapsed": false
+				},
+				"source": [
+					"from delta import DeltaTable\r\n",
+					"\r\n",
+					"table = DeltaTable.forPath(spark,'abfss://delta@projectsynapsestorage.dfs.core.windows.net/OnlyParquet/')\r\n",
+					"\r\n",
+					"display(table.history())"
+				],
+				"execution_count": 10
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"microsoft": {
+						"language": "sparksql"
+					},
+					"collapsed": false
+				},
+				"source": [
+					"%%sql\r\n",
+					"\r\n",
+					"DESCRIBE HISTORY delta.`abfss://delta@projectsynapsestorage.dfs.core.windows.net/OnlyParquet/`"
+				],
+				"execution_count": 11
+			},
+			{
+				"cell_type": "markdown",
+				"metadata": {
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"# Checkpoint"
+				]
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"microsoft": {
+						"language": "sparksql"
+					},
+					"collapsed": false
+				},
+				"source": [
+					"%%sql\r\n",
+					"--  Now lets create an external table using this\r\n",
+					"\r\n",
+					"CREATE TABLE delta.ExtDeltaTable\r\n",
+					"(\r\n",
+					"    Education_Level STRING,\r\n",
+					"    LNo INT,\r\n",
+					"    Year INT,\r\n",
+					"    Month STRING,\r\n",
+					"    State STRING,\r\n",
+					"    Labor_Force INT,\r\n",
+					"    Employed INT,\r\n",
+					"    Unemployed INT,\r\n",
+					"    Industry STRING,\r\n",
+					"    Gender STRING,\r\n",
+					"    Date_Inserted STRING,\r\n",
+					"    UnEmployed_Rate_Percentage DOUBLE,\r\n",
+					"    Min_Salary_USD INT,\r\n",
+					"    Max_Salary_USD INT,\r\n",
+					"    dense_rank INT\r\n",
+					")\r\n",
+					"USING DELTA\r\n",
+					"LOCATION 'abfss://delta@projectsynapsestorage.dfs.core.windows.net/OnlyParquet/'"
+				],
+				"execution_count": 14
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"microsoft": {
+						"language": "sparksql"
+					},
+					"collapsed": false
+				},
+				"source": [
+					"%%sql\r\n",
+					"\r\n",
+					"INSERT INTO delta.ExtDeltaTable\r\n",
+					"VALUES\r\n",
+					"    ('Bachelor', 1, 2023, 7, 'NY', 5000, 4500, 500, 'Networking', 'Male', '2023-07-12', 10.5, 40000, 60000, 1)"
+				],
+				"execution_count": 15
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"microsoft": {
+						"language": "sparksql"
+					},
+					"collapsed": false
+				},
+				"source": [
+					"\r\n",
+					"%%sql\r\n",
+					"\r\n",
+					"INSERT INTO delta.ExtDeltaTable\r\n",
+					"VALUES\r\n",
+					"    ('Bachelor', 1, 2023, 7, 'NY', 5000, 4500, 500, 'Networking', 'Male', '2023-07-12', 10.5, 40000, 60000, 2)"
+				],
+				"execution_count": 16
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"microsoft": {
+						"language": "sparksql"
+					},
+					"collapsed": false
+				},
+				"source": [
+					"\r\n",
+					"%%sql\r\n",
+					"\r\n",
+					"INSERT INTO delta.ExtDeltaTable\r\n",
+					"VALUES\r\n",
+					"('Master', 2, 2023, 7, 'CA', 7000, 6500, 500, 'Networking', 'Female', '2023-07-12', 8.2, 50000, 80000, 3)"
+				],
+				"execution_count": 17
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"microsoft": {
+						"language": "sparksql"
+					},
+					"collapsed": false
+				},
+				"source": [
+					"\r\n",
+					"%%sql\r\n",
+					"\r\n",
+					"INSERT INTO delta.ExtDeltaTable\r\n",
+					"VALUES\r\n",
+					"('High School', 3, 2023, 7, 'TX', 4000, 3500, 500, 'Networking', 'Male', '2023-07-12', 12.1, 30000, 40000, 4)"
+				],
+				"execution_count": 18
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"microsoft": {
+						"language": "sparksql"
+					},
+					"collapsed": false
+				},
+				"source": [
+					"\r\n",
+					"%%sql\r\n",
+					"\r\n",
+					"INSERT INTO delta.ExtDeltaTable\r\n",
+					"VALUES\r\n",
+					"('PhD', 4, 2023, 7, 'FL', 6000, 5500, 500, 'Networking', 'Female', '2023-07-12', 7.9, 60000, 90000, 5)"
+				],
+				"execution_count": 19
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"microsoft": {
+						"language": "sparksql"
+					}
+				},
+				"source": [
+					"\r\n",
+					"%%sql\r\n",
+					"\r\n",
+					"INSERT INTO delta.ExtDeltaTable\r\n",
+					"VALUES\r\n",
+					"('PhD', 4, 2023, 7, 'FL', 6000, 5500, 500, 'Networking', 'Female', '2023-07-12', 7.9, 60000, 90000, 6)"
+				],
+				"execution_count": null
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"microsoft": {
+						"language": "sparksql"
+					},
+					"collapsed": false
+				},
+				"source": [
+					"\r\n",
+					"%%sql\r\n",
+					"\r\n",
+					"INSERT INTO delta.ExtDeltaTable\r\n",
+					"VALUES\r\n",
+					"('PhD', 4, 2023, 7, 'FL', 6000, 5500, 500, 'Networking', 'Female', '2023-07-12', 7.9, 60000, 90000, 7)"
+				],
+				"execution_count": 20
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"microsoft": {
+						"language": "sparksql"
+					},
+					"collapsed": false
+				},
+				"source": [
+					"%%sql\r\n",
+					"\r\n",
+					"DESCRIBE HISTORY delta.ExtDeltaTable"
+				],
+				"execution_count": 21
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"microsoft": {
+						"language": "sparksql"
+					},
+					"collapsed": false
+				},
+				"source": [
+					"\r\n",
+					"%%sql\r\n",
+					"\r\n",
+					"INSERT INTO delta.ExtDeltaTable\r\n",
+					"VALUES\r\n",
+					"('PhD', 4, 2023, 7, 'FL', 6000, 5500, 500, 'Networking', 'Female', '2023-07-12', 7.9, 60000, 90000, 7)"
+				],
+				"execution_count": 22
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"microsoft": {
+						"language": "sparksql"
+					},
+					"collapsed": false
+				},
+				"source": [
+					"\r\n",
+					"%%sql\r\n",
+					"\r\n",
+					"INSERT INTO delta.ExtDeltaTable\r\n",
+					"VALUES\r\n",
+					"('PhD', 4, 2023, 7, 'FL', 6000, 5500, 500, 'Networking', 'Female', '2023-07-12', 7.9, 60000, 90000, 68)"
+				],
+				"execution_count": 23
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"microsoft": {
+						"language": "sparksql"
+					},
+					"collapsed": false
+				},
+				"source": [
+					"\r\n",
+					"%%sql\r\n",
+					"\r\n",
+					"INSERT INTO delta.ExtDeltaTable\r\n",
+					"VALUES\r\n",
+					"('PhD', 4, 2023, 7, 'FL', 6000, 5500, 500, 'Networking', 'Female', '2023-07-12', 7.9, 60000, 90000, 9)"
+				],
+				"execution_count": 24
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"microsoft": {
+						"language": "sparksql"
+					},
+					"collapsed": false
+				},
+				"source": [
+					"\r\n",
+					"%%sql\r\n",
+					"\r\n",
+					"INSERT INTO delta.ExtDeltaTable\r\n",
+					"VALUES\r\n",
+					"('PhD', 4, 2023, 7, 'FL', 6000, 5500, 500, 'Networking', 'Female', '2023-07-12', 7.9, 60000, 90000, 9)"
+				],
+				"execution_count": 25
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"collapsed": false
+				},
+				"source": [
+					"display(spark.read.format('parquet').load('abfss://delta@projectsynapsestorage.dfs.core.windows.net/OnlyParquet/_delta_log/00000000000000000010.checkpoint.parquet'))"
+				],
+				"execution_count": 28
+			}
+		]
+	}
+}

@@ -1,0 +1,305 @@
+{
+	"name": "1_UDFs",
+	"properties": {
+		"folder": {
+			"name": "final"
+		},
+		"nbformat": 4,
+		"nbformat_minor": 2,
+		"sessionProperties": {
+			"driverMemory": "28g",
+			"driverCores": 4,
+			"executorMemory": "28g",
+			"executorCores": 4,
+			"numExecutors": 2,
+			"conf": {
+				"spark.dynamicAllocation.enabled": "false",
+				"spark.dynamicAllocation.minExecutors": "2",
+				"spark.dynamicAllocation.maxExecutors": "2",
+				"spark.autotune.trackingId": "c0ac39e7-a18f-4928-ac6b-64f6db725a9c"
+			}
+		},
+		"metadata": {
+			"saveOutput": true,
+			"enableDebugMode": false,
+			"kernelspec": {
+				"name": "synapse_pyspark",
+				"display_name": "Synapse PySpark"
+			},
+			"language_info": {
+				"name": "python"
+			},
+			"sessionKeepAliveTimeout": 30
+		},
+		"cells": [
+			{
+				"cell_type": "code",
+				"source": [
+					"mssparkutils.notebook.run('4 - MSSpark Utilities/6 - Mount configuration')"
+				],
+				"execution_count": 2
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"## - Accessing the Files from Mountpoint \r\n",
+					"## Syntax:\r\n",
+					"# synfs:/<jobid>/<mountpoint>/<path>\r\n",
+					"# To get JobID - mssparkutils.env.getJobId()\r\n",
+					"\r\n",
+					"\r\n",
+					"job_id = mssparkutils.env.getJobId()\r\n",
+					"\r\n",
+					"mount_point = 'synfs:/' + job_id + '/lake'"
+				],
+				"execution_count": 3
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"## Reading the previous Schema data to a dataframe\r\n",
+					"\r\n",
+					"df = spark.read.format('parquet')\\\r\n",
+					"                .option('header','true')\\\r\n",
+					"                .load(mount_point+'/SchemaManagement/*.parquet')\r\n",
+					"\r\n",
+					""
+				],
+				"execution_count": 4
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"# Create normal multiply function in python \r\n",
+					"\r\n",
+					"def multiply2(x):\r\n",
+					"    return x*2"
+				],
+				"execution_count": 5
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"df.createOrReplaceTempView('SchemaView')"
+				],
+				"execution_count": 6
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"spark.sql(\"SELECT UnEmployed_Rate_Percentage, multiply2(UnEmployed_Rate_Percentage) AS Doubled FROM SchemaView\").show()"
+				],
+				"execution_count": 7
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"# Registering the UDF to use in Spark SQL\r\n",
+					"\r\n",
+					"spark.udf.register('multiply2_udf',multiply2)"
+				],
+				"execution_count": 8
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"spark.sql(\"SELECT UnEmployed_Rate_Percentage, multiply2_udf(UnEmployed_Rate_Percentage) AS Doubled FROM SchemaView\").show()"
+				],
+				"execution_count": 9
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"# Applying the registered UDF on dataframe \r\n",
+					"\r\n",
+					"df.withColumn('multiplied',multiply2_udf(df.UnEmployed_Rate_Percentage)).show()"
+				],
+				"execution_count": 10
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"# Registering function to use in Dataframe \r\n",
+					"\r\n",
+					"from pyspark.sql.functions import udf\r\n",
+					"from pyspark.sql.types import DoubleType\r\n",
+					"\r\n",
+					"multiply2_df_udf = udf(lambda x: multiply2(x), DoubleType())"
+				],
+				"execution_count": 11
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"collapsed": false
+				},
+				"source": [
+					"display(df.withColumn('multiplied',multiply2_df_udf(df.UnEmployed_Rate_Percentage)))"
+				],
+				"execution_count": 13
+			},
+			{
+				"cell_type": "markdown",
+				"metadata": {
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"# Method 2 - Using annotation"
+				]
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"# Defining function using annotation \r\n",
+					"\r\n",
+					"@udf(DoubleType())\r\n",
+					"def add3(x):\r\n",
+					"    return x+3"
+				],
+				"execution_count": 24
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"collapsed": false
+				},
+				"source": [
+					"display(df.withColumn('Added',add3(df.UnEmployed_Rate_Percentage)))"
+				],
+				"execution_count": 25
+			}
+		]
+	}
+}

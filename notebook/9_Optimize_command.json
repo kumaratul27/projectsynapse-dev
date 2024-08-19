@@ -1,0 +1,340 @@
+{
+	"name": "9_Optimize_command",
+	"properties": {
+		"folder": {
+			"name": "final"
+		},
+		"nbformat": 4,
+		"nbformat_minor": 2,
+		"sessionProperties": {
+			"driverMemory": "28g",
+			"driverCores": 4,
+			"executorMemory": "28g",
+			"executorCores": 4,
+			"numExecutors": 2,
+			"conf": {
+				"spark.dynamicAllocation.enabled": "false",
+				"spark.dynamicAllocation.minExecutors": "2",
+				"spark.dynamicAllocation.maxExecutors": "2",
+				"spark.autotune.trackingId": "7ae3395c-30e9-4fac-9657-cbb90130febf"
+			}
+		},
+		"metadata": {
+			"saveOutput": true,
+			"enableDebugMode": false,
+			"kernelspec": {
+				"name": "synapse_pyspark",
+				"display_name": "Synapse PySpark"
+			},
+			"language_info": {
+				"name": "python"
+			},
+			"sessionKeepAliveTimeout": 30
+		},
+		"cells": [
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"microsoft": {
+						"language": "sparksql"
+					},
+					"collapsed": false
+				},
+				"source": [
+					"%%sql\r\n",
+					"\r\n",
+					"use delta;\r\n",
+					"\r\n",
+					"CREATE TABLE OptimizeTable\r\n",
+					"(\r\n",
+					"    Education_Level VARCHAR(50),\r\n",
+					"    Line_Number INT,\r\n",
+					"    Year INT,\r\n",
+					"    Month INT,\r\n",
+					"    State VARCHAR(5),\r\n",
+					"    Labor_Force INT,\r\n",
+					"    Employed INT,\r\n",
+					"    Unemployed INT,\r\n",
+					"    Industry VARCHAR(50),\r\n",
+					"    Gender VARCHAR(10),\r\n",
+					"    Date_Inserted DATE,\r\n",
+					"    UnEmployed_Rate_Percentage DOUBLE,\r\n",
+					"    Min_Salary_USD DOUBLE,\r\n",
+					"    Max_Salary_USD DOUBLE,\r\n",
+					"    dense_rank INT\r\n",
+					")\r\n",
+					"USING DELTA"
+				],
+				"execution_count": 2
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"microsoft": {
+						"language": "sparksql"
+					},
+					"collapsed": false
+				},
+				"source": [
+					"%%sql\r\n",
+					"-- Lets insert a record into that table\r\n",
+					"-- Line Number row is having value 100\r\n",
+					"INSERT INTO delta.OptimizeTable\r\n",
+					"VALUES\r\n",
+					"    ('Bachelor', 100, 2023, 7, 'NY', 5000, 4500, 500, 'Networking', 'Male', '2023-07-12', 10.5, 40000, 60000, 1)"
+				],
+				"execution_count": 3
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"microsoft": {
+						"language": "sparksql"
+					},
+					"collapsed": false
+				},
+				"source": [
+					"%%sql\r\n",
+					"\r\n",
+					"-- Lets insert one more record\r\n",
+					"-- Line Number row is having value 101\r\n",
+					"\r\n",
+					"INSERT INTO delta.OptimizeTable\r\n",
+					"VALUES\r\n",
+					"    ('Bachelor', 101, 2023, 7, 'NY', 5000, 4500, 500, 'Networking', 'Male', '2023-07-12', 10.5, 40000, 60000, 2)"
+				],
+				"execution_count": 4
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"microsoft": {
+						"language": "sparksql"
+					},
+					"collapsed": false
+				},
+				"source": [
+					"%%sql\r\n",
+					"\r\n",
+					"-- Lets do one more final WRITE operation by adding record\r\n",
+					"-- Line number row is having value 102\r\n",
+					"\r\n",
+					"INSERT INTO delta.OptimizeTable\r\n",
+					"VALUES\r\n",
+					"('Master', 102, 2023, 7, 'CA', 7000, 6500, 500, 'Networking', 'Female', '2023-07-12', 8.2, 50000, 80000, 3)"
+				],
+				"execution_count": 5
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"microsoft": {
+						"language": "sparksql"
+					},
+					"collapsed": false
+				},
+				"source": [
+					"%%sql\r\n",
+					"\r\n",
+					"-- Now lets delete a record that is having Line_Number as 101\r\n",
+					"DELETE FROM delta.OptimizeTable\r\n",
+					"WHERE Line_Number = 101"
+				],
+				"execution_count": 6
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"microsoft": {
+						"language": "sparksql"
+					},
+					"collapsed": false
+				},
+				"source": [
+					"%%sql\r\n",
+					"-- Now lets update a record\r\n",
+					"-- So lets change the Line_Number 102 to 99\r\n",
+					"\r\n",
+					"UPDATE delta.OptimizeTable\r\n",
+					"SET Line_Number = 99\r\n",
+					"WHERE Line_Number = 102"
+				],
+				"execution_count": 7
+			},
+			{
+				"cell_type": "markdown",
+				"metadata": {
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"# Applying optimize command"
+				]
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"microsoft": {
+						"language": "sparksql"
+					},
+					"collapsed": false
+				},
+				"source": [
+					"%%sql\r\n",
+					"OPTIMIZE delta.OptimizeTable"
+				],
+				"execution_count": 8
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": true
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"(spark.read.format('text').load('abfss://project@projectsynapsestorage.dfs.core.windows.net/synapse/workspaces/projectsynapse/warehouse/delta.db/optimizetable/_delta_log/00000000000000000006.json')).show(truncate=False)"
+				],
+				"execution_count": 9
+			},
+			{
+				"cell_type": "markdown",
+				"metadata": {
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"|{\"**commitInfo**\":{\"timestamp\":1690867025477,**\"operation\":\"OPTIMIZE\"**,\"operationParameters\":{\"predicate\":\"[]\",\"auto\":false,\"zOrderBy\":\"[]\"},\"readVersion\":5,\"isolationLevel\":\"SnapshotIsolation\",\"isBlindAppend\":false,\"operationMetrics\":**{\"numRemovedFiles\":\"2\"**,\"numRemovedBytes\":\"8316\",\"p25FileSize\":\"4435\",\"minFileSize\":\"4435\",\"numAddedFiles\":\"1\",\"maxFileSize\":\"4435\",\"p75FileSize\":\"4435\",\"p50FileSize\":\"4435\",\"numAddedBytes\":\"4435\"},\"engineInfo\":\"Apache-Spark/3.3.1.5.2-92314920 Delta-Lake/2.2.0.6\",\"txnId\":\"af1cc0fb-b2f7-44e1-a09b-9ae948ec83de\"}}                                                                                                                                                                                                                                                                                                                                                              <br>                            <br>                                                                                                                                                                                                                                                                                                    |\r\n",
+					"|**{\"add\":**{\"path\":\"part-00000-e65a217d-9811-4ea8-809b**-48bdb837e663-c000.snappy.parque**t\",\"partitionValues\":{},\"size\":4435,\"modificationTime\":1690867025420,\"dataChange\":false,\"stats\":\"{\\\"numRecords\\\":2,\\\"minValues\\\":{\\\"Education_Level\\\":\\\"Bachelor\\\",\\\"Line_Number\\\":99,\\\"Year\\\":2023,\\\"Month\\\":7,\\\"State\\\":\\\"CA\\\",\\\"Labor_Force\\\":5000,\\\"Employed\\\":4500,\\\"Unemployed\\\":500,\\\"Industry\\\":\\\"Networking\\\",\\\"Gender\\\":\\\"Female\\\",\\\"Date_Inserted\\\":\\\"2023-07-12\\\",\\\"UnEmployed_Rate_Percentage\\\":8.2,\\\"Min_Salary_USD\\\":40000.0,\\\"Max_Salary_USD\\\":60000.0,\\\"dense_rank\\\":1},\\\"maxValues\\\":{\\\"Education_Level\\\":\\\"Master\\\",\\\"Line_Number\\\":100,\\\"Year\\\":2023,\\\"Month\\\":7,\\\"State\\\":\\\"NY\\\",\\\"Labor_Force\\\":7000,\\\"Employed\\\":6500,\\\"Unemployed\\\":500,\\\"Industry\\\":\\\"Networking\\\",\\\"Gender\\\":\\\"Male\\\",\\\"Date_Inserted\\\":\\\"2023-07-12\\\",\\\"UnEmployed_Rate_Percentage\\\":10.5,\\\"Min_Salary_USD\\\":50000.0,\\\"Max_Salary_USD\\\":80000.0,\\\"dense_rank\\\":3},\\\"nullCount\\\":{\\\"Education_Level\\\":0,\\\"Line_Number\\\":0,\\\"Year\\\":0,\\\"Month\\\":0,\\\"State\\\":0,\\\"Labor_Force\\\":0,\\\"Employed\\\":0,\\\"Unemployed\\\":0,\\\"Industry\\\":0,\\\"Gender\\\":0,\\\"Date_Inserted\\\":0,\\\"UnEmployed_Rate_Percentage\\\":0,\\\"Min_Salary_USD\\\":0,\\\"Max_Salary_USD\\\":0,\\\"dense_rank\\\":0}}\",\"tags\":{}}}|\r\n",
+					"\r\n",
+					"<br>\r\n",
+					"|**{\"remove\":**{\"path\":\"part-00000-12711143-4793-4fdf-8c51-9**a6418b91171-c000.snappy.parquet\"**,\"deletionTimestamp\":1690867023085,\"dataChange\":false,\"extendedFileMetadata\":true,\"partitionValues\":{},\"size\":4074,\"tags\":{}}}                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     <br>    <br>                                                                                                                                                                                                                                                                                                                                                                                                                               |\r\n",
+					"|**{\"remove\":**{\"path\":\"part-00000-1218c966-61ba-4e32-931e-b16**629b72c22-c000.snappy.parquet**\",\"deletionTimestamp\":1690867023085,\"dataChange\":false,\"extendedFileMetadata\":true,\"partitionValues\":{},\"size\":4242,\"tags\":{}}}                         "
+				]
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"microsoft": {
+						"language": "sparksql"
+					},
+					"collapsed": false
+				},
+				"source": [
+					"%%sql\r\n",
+					"\r\n",
+					"DESCRIBE HISTORY delta.OptimizeTable"
+				],
+				"execution_count": 10
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"microsoft": {
+						"language": "sparksql"
+					},
+					"collapsed": false
+				},
+				"source": [
+					"%%sql\r\n",
+					"SELECT *\r\n",
+					"FROM delta.OptimizeTable VERSION AS OF 4"
+				],
+				"execution_count": 11
+			}
+		]
+	}
+}
