@@ -5,13 +5,13 @@
 			"name": "final"
 		},
 		"content": {
-			"query": "CREATE TABLE dbo.SQLPool_Table\n\t(\n\t [Education_Level] varchar(4000),\n\t [Line_Number] int,\n\t [Year] int,\n\t [Month] nvarchar(4000),\n\t [State] nvarchar(4000),\n\t [Labor_Force] int,\n\t [Employed] int,\n\t [Unemployed] int,\n\t [Industry] varchar(4000),\n\t [Gender] varchar(4000),\n\t [Date_Inserted] date,\n\t [UnEmployed_Rate_Percentage] real,\n\t [Min_Salary_USD] int,\n\t [Max_Salary_USD] int,\n\t [dense_rank] int\n\t)\nWITH\n(\n    DISTRIBUTION = ROUND_ROBIN,\n    CLUSTERED COLUMNSTORE INDEX\n)\n\n\nCOPY INTO dbo.SQLPool_Table\n(Education_Level 1, Line_Number 2, Year 3, Month 4, State 5, Labor_Force 6, Employed 7, Unemployed 8, Industry 9, Gender 10, Date_Inserted 11, UnEmployed_Rate_Percentage 12, Min_Salary_USD 13, Max_Salary_USD 14, dense_rank 15)\nFROM 'https://projectsynapsestorage.dfs.core.windows.net/processed/processed/part-00000-0bc541ca-7ad0-476a-b53f-549d5c38cedf-c000.snappy.parquet'\nWITH\n(\n    FILE_TYPE='PARQUET'\n)\n\n\n\nselect * from dbo.SQLPool_Table\n\n",
+			"query": "CREATE TABLE dbo.SQLPool_Table\n\t(\n\t [Education_Level] varchar(4000),\n\t [Line_Number] int,\n\t [Year] int,\n\t [Month] nvarchar(4000),\n\t [State] nvarchar(4000),\n\t [Labor_Force] int,\n\t [Employed] int,\n\t [Unemployed] int,\n\t [Industry] varchar(4000),\n\t [Gender] varchar(4000),\n\t [Date_Inserted] date,\n\t [UnEmployed_Rate_Percentage] real,\n\t [Min_Salary_USD] int,\n\t [Max_Salary_USD] int,\n\t [dense_rank] int\n\t)\nWITH\n(\n    DISTRIBUTION = ROUND_ROBIN,\n    CLUSTERED COLUMNSTORE INDEX\n)\n\n\nCOPY INTO dbo.SQLPool_Table\n(Education_Level 1, Line_Number 2, Year 3, Month 4, State 5, Labor_Force 6, Employed 7, Unemployed 8, Industry 9, Gender 10, Date_Inserted 11, UnEmployed_Rate_Percentage 12, Min_Salary_USD 13, Max_Salary_USD 14, dense_rank 15)\nFROM 'https://projectsynapsedev.dfs.core.windows.net/refined/NoNulls/part-00000-5b777022-a4ed-43eb-8ac9-7fee2896cf14-c000.snappy.parquet'\nWITH\n(\n    FILE_TYPE='PARQUET'\n)\n\n\n\nselect * from dbo.SQLPool_Table\n\n",
 			"metadata": {
 				"language": "sql"
 			},
 			"currentConnection": {
-				"databaseName": "master",
-				"poolName": "Built-in"
+				"databaseName": "Dedicated",
+				"poolName": "Dedicated"
 			},
 			"resultLimit": 5000
 		},
